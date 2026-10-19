@@ -1,396 +1,120 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Capy Hero Adventure</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Capy Hero | ผจญภัยค้นหาสาขาที่ใช่</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#142438;color:white;font-family:Arial,Tahoma,sans-serif;text-align:center}
-header{padding:10px;background:#182c46}
-h2{margin:4px;font-size:21px}
-#info{font-size:14px;margin-top:5px}
-#game{display:block;width:100%;max-width:960px;margin:auto;background:#8ed8fa;touch-action:none}
-.controls{display:flex;justify-content:space-between;align-items:center;max-width:960px;margin:12px auto;padding:0 14px;gap:12px}
-.pad{display:flex;gap:13px}
-.ctrl{border:2px solid #ffffff66;background:#294d78;color:white;border-radius:18px;width:76px;height:69px;font-size:29px;font-weight:bold;touch-action:none;user-select:none;-webkit-user-select:none}
-.ctrl:active,.ctrl.pressed{background:#f4a340;color:#172333}
-#jump{width:112px;background:#d77438}
-#restart{background:#405e84;border:0;border-radius:12px;color:white;padding:10px 20px;margin:5px}
-#overlay{position:fixed;inset:0;background:#071526df;display:none;align-items:center;justify-content:center;z-index:10;padding:20px}
-.panel{width:100%;max-width:450px;background:#fff;color:#203047;border-radius:20px;padding:25px;text-align:left;box-shadow:0 12px 40px #0006}
-.panel h2{text-align:center}
-.option{display:block;width:100%;padding:15px;margin:10px 0;background:#e8f1ff;color:#173653;border:0;border-radius:12px;font-size:16px;text-align:left}
-.option:active{background:#badbff}
-#feedback{color:#c04128;font-weight:bold}
+:root{--navy:#162842;--gold:#ffcf65;--ink:#17304e}*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#152c4a,#274e69);color:white;font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;text-align:center}header{padding:12px 10px 8px}header h1{margin:0;font-size:clamp(20px,4vw,29px)}.sub{font-size:13px;opacity:.85;margin:4px}.hud{max-width:960px;margin:8px auto;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;padding:0 10px;font-weight:750}.hud span{background:#ffffff1e;border:1px solid #ffffff3a;border-radius:16px;padding:8px 12px}canvas{display:block;width:min(100%,960px);height:auto;margin:auto;border:3px solid #ffffff32;border-radius:14px;background:#a7ddf8;touch-action:none}.controls{display:flex;justify-content:space-between;max-width:960px;gap:8px;margin:12px auto 4px;padding:0 14px}.pad{display:flex;gap:11px}.ctrl{touch-action:none;user-select:none;-webkit-user-select:none;border:0;border-radius:17px;background:#e3eefc;color:#17304e;min-width:76px;min-height:69px;font-size:26px;font-weight:900;box-shadow:0 5px 0 #7294bb}.ctrl.pressed{transform:translateY(4px);box-shadow:0 1px 0 #7294bb}#jump{background:#ffcc63;min-width:124px;box-shadow:0 5px 0 #be8730;font-size:18px}.tools{display:flex;justify-content:center;gap:10px;margin:15px}.small{border:1px solid #ffffff65;background:#ffffff1b;color:#fff;padding:11px 17px;border-radius:12px;font-weight:bold}.note{font-size:12px;opacity:.8;padding:0 10px 20px}#overlay{position:fixed;inset:0;background:#0b1b31dd;display:flex;align-items:center;justify-content:center;padding:16px;z-index:5;overflow-y:auto}.panel{background:#fff;color:var(--ink);border-radius:22px;padding:24px;max-width:510px;width:100%;text-align:left;box-shadow:0 15px 40px #0005}.panel h2{text-align:center;margin:5px 0 10px}.panel p{line-height:1.55}.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px 12px;margin:10px 0;font-size:16px;font-weight:700;background:#e9f2ff;color:#17304e;text-align:left}.btn.primary{background:#ffcc63;text-align:center}.btn:disabled{opacity:.6}.eyebrow{text-align:center;font-size:12px;color:#6b7890;font-weight:700}.feedback{font-weight:700;color:#9b3c2b}.pill{display:inline-block;background:#e6f5e7;color:#267348;padding:7px 10px;border-radius:20px;font-size:12px;font-weight:700}.result{background:#f0f6ff;padding:14px;border-radius:14px}.link{color:#164fb0;overflow-wrap:anywhere}.muted{color:#5c6d82;font-size:12px}.hidden{display:none!important} @media(max-width:500px){.hud{font-size:12px}.hud span{padding:6px 8px}.panel{padding:17px}.ctrl{min-width:69px}.controls{padding:0 10px}}
 </style>
 </head>
 <body>
-<header>
-<h2>🐹 CAPY HERO ADVENTURE</h2>
-<div id="info">ด่าน 1 | ❤️❤️❤️ | 🪙 0 คะแนน</div>
-</header>
-
-<canvas id="game" width="960" height="540"></canvas>
-
-<div class="controls">
- <div class="pad">
-  <button class="ctrl" id="left">◀</button>
-  <button class="ctrl" id="right">▶</button>
- </div>
- <button class="ctrl" id="jump">⬆ กระโดด</button>
-</div>
-<button id="restart">🔄 เริ่มเกมใหม่</button>
-<div style="font-size:12px;padding:10px">เดินไปข้างหน้า เก็บเหรียญ หลบศัตรู แล้วไปให้ถึงธงเส้นชัย</div>
-
-<div id="overlay"><div class="panel" id="panel"></div></div>
-
+<header><h1>🐹 CAPY HERO ADVENTURE</h1><p class="sub">ผจญภัยค้นหาสาขาที่ใช่ • วิทยาลัยโพธิวิชชาลัย มศว</p></header>
+<div class="hud"><span id="levelText">ด่าน 1/6</span><span id="lifeText">❤️❤️❤️</span><span id="scoreText">🪙 0 คะแนน</span></div>
+<canvas id="game" width="960" height="500" aria-label="เกม Capy Hero"></canvas>
+<div class="controls"><div class="pad"><button type="button" id="left" class="ctrl" aria-label="เดินซ้าย">◀</button><button type="button" id="right" class="ctrl" aria-label="เดินขวา">▶</button></div><button type="button" id="jump" class="ctrl">⬆ กระโดด</button></div>
+<div class="tools"><button class="small" type="button" id="restart">↻ เริ่มใหม่</button><button class="small" type="button" id="how">? วิธีเล่น</button><button class="small" type="button" id="sound" aria-pressed="true">🔊 เปิดเสียง</button></div>
+<div class="note">มือถือ: กดปุ่ม ◀ ▶ และกระโดด • คอมพิวเตอร์: ← → และ Space • By : Sasi</div>
+<div id="overlay"><section class="panel" id="panel"></section></div>
 <script>
-"use strict";
-
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-const info=document.getElementById("info");
-const overlay=document.getElementById("overlay");
-const panel=document.getElementById("panel");
-
-const W=960,H=540;
-const FLOOR=458, WORLD=2900;
-const GRAVITY=0.58, SPEED=4.7, JUMP=-12.8;
+'use strict';
+const $=id=>document.getElementById(id), canvas=$('game'),ctx=canvas.getContext('2d'),overlay=$('overlay'),panel=$('panel');
+const W=960,H=500,FLOOR=420,WORLD=2050,GRAV=.72,MOVE=5.1,JUMP=-14.5;
+// Web Audio sounds are synthesized in the browser; no external MP3 downloads needed.
+let audioCtx=null, soundOn=true;
+function unlockAudio(){
+ if(!soundOn)return;
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return;
+  if(!audioCtx)audioCtx=new AC();
+  if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+ }catch(err){console.warn('Audio unavailable',err)}
+}
+function tone(freq,duration=0.10,delay=0,type='sine',volume=0.12,endFreq){
+ if(!soundOn||!audioCtx||audioCtx.state!=='running')return;
+ try{
+  const t=audioCtx.currentTime+delay,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,t);
+  if(endFreq)osc.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),t+duration);
+  gain.gain.setValueAtTime(0.0001,t);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0002,volume),t+0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc.start(t);osc.stop(t+duration+0.02);
+ }catch(err){console.warn('Sound failed',err)}
+}
+function sfx(name){
+ switch(name){
+  case 'coin':tone(880,.065,0,'sine',.09);tone(1320,.12,.065,'sine',.1);break;
+  case 'jump':tone(290,.16,0,'triangle',.10,650);break;
+  case 'hit':tone(260,.24,0,'sawtooth',.08,80);break;
+  case 'death':tone(460,.19,0,'triangle',.13,270);tone(300,.24,.2,'triangle',.12,125);tone(175,.32,.45,'triangle',.1,75);break;
+  case 'stomp':tone(400,.1,0,'square',.05,170);break;
+  case 'wrong':tone(180,.15,0,'triangle',.11);tone(135,.2,.15,'triangle',.1);break;
+  case 'correct':tone(520,.10);tone(660,.10,.11);tone(880,.19,.23);break;
+  case 'level':tone(523,.13);tone(659,.13,.14);tone(784,.13,.28);tone(1047,.3,.43);break;
+  case 'finish':for(let i=0;i<8;i++)tone([523,659,784,1047,784,880,1047,1318][i],.17,i*.13,'triangle',.11);break;
+ }
+}
+// Safari on iPhone requires a real user gesture before starting audio.
+document.addEventListener('pointerdown',unlockAudio,{passive:true});
+document.addEventListener('keydown',unlockAudio);
+$('sound').addEventListener('click',()=>{
+ soundOn=!soundOn;
+ $('sound').textContent=soundOn?'🔊 เปิดเสียง':'🔇 ปิดเสียง';
+ $('sound').setAttribute('aria-pressed',String(soundOn));
+ if(soundOn){unlockAudio();sfx('correct')}
+});
 
 const levels=[
- {name:"มหภัยน้ำท่วม",theme:"flood",sky:"#9bdcf5",
-  question:"หากพบถนนที่มีน้ำท่วมสูง ควรทำอย่างไร?",
-  options:["ขับรถฝ่าน้ำทันที","หลีกเลี่ยงเส้นทางและตรวจสอบข้อมูล","เดินลงไปทดสอบกระแสน้ำ"],
-  answer:1,explain:"น้ำอาจลึกหรือไหลแรงกว่าที่เห็น ควรหลีกเลี่ยงและตรวจสอบเส้นทางปลอดภัย"},
- {name:"ภารกิจไฟป่า",theme:"fire",sky:"#f5c48d",
-  question:"เมื่อพบไฟป่าใกล้ชุมชน สิ่งใดเหมาะสมที่สุด?",
-  options:["เข้าไปดับไฟด้วยตนเองทันที","แจ้งเจ้าหน้าที่และออกจากพื้นที่เสี่ยง","ยืนถ่ายคลิปใกล้เปลวไฟ"],
-  answer:1,explain:"ควรแจ้งหน่วยงานที่รับผิดชอบและปฏิบัติตามคำแนะนำการอพยพ"},
- {name:"ผจญภัยเมืองวัฒนธรรม",theme:"culture",sky:"#b1e8fa",
-  question:"การท่องเที่ยวเชิงวัฒนธรรมอย่างยั่งยืนควรทำอย่างไร?",
-  options:["เคารพวิถีชีวิตและกติกาชุมชน","นำโบราณวัตถุกลับบ้าน","เข้าไปในพื้นที่หวงห้าม"],
-  answer:0,explain:"การเคารพชุมชนและมรดกวัฒนธรรมช่วยรักษาคุณค่าของพื้นที่"},
- {name:"โลกแห่งความหลากหลาย",theme:"diversity",sky:"#e5caf8",
-  question:"เมื่อต้องทำงานร่วมกับผู้คนต่างวัฒนธรรม ควรทำอย่างไร?",
-  options:["เหมารวมว่าทุกคนเหมือนกัน","ไม่รับฟังความคิดเห็นที่แตกต่าง","รับฟังและเคารพความแตกต่าง"],
-  answer:2,explain:"ความเข้าใจและการเคารพซึ่งกันและกันเป็นพื้นฐานของการอยู่ร่วมกัน"},
- {name:"เมืองแห่ง AI",theme:"ai",sky:"#a9caff",
-  question:"หาก AI ให้ข้อมูลที่น่าสงสัย ควรทำอย่างไร?",
-  options:["เชื่อทันที","ตรวจสอบจากแหล่งข้อมูลที่น่าเชื่อถือ","แชร์ต่อโดยไม่ตรวจสอบ"],
-  answer:1,explain:"AI อาจสร้างข้อมูลผิดพลาด จึงต้องตรวจสอบก่อนนำไปใช้"},
- {name:"ภารกิจหยุดโรคระบาด",theme:"health",sky:"#b9eedb",
-  question:"วิธีใดช่วยลดการแพร่กระจายของโรคติดเชื้อทางเดินหายใจ?",
-  options:["ปิดบังอาการป่วย","ใช้ของส่วนตัวร่วมกัน","ล้างมือ ระบายอากาศ และปฏิบัติตามคำแนะนำสาธารณสุข"],
-  answer:2,explain:"สุขอนามัยและการป้องกันที่เหมาะสมช่วยลดความเสี่ยงการติดเชื้อ"}
+ {name:'ฮีโร่พิชิตน้ำท่วม',icon:'🌊',sky:'#9ed9f5',danger:'🌊',focus:'social',lesson:'การจัดการภูมิสังคมช่วยให้เราเข้าใจพื้นที่ ความเสี่ยง และการรับมือภัยพิบัติ',question:'ชุมชนกำลังเผชิญน้ำท่วม สิ่งใดช่วยวางแผนอพยพได้ดีที่สุด?',options:['ใช้แผนที่พื้นที่เสี่ยงและเส้นทางปลอดภัย','รอจนระดับน้ำสูงแล้วค่อยวางแผน','เลือกเส้นทางจากความคุ้นเคยเพียงอย่างเดียว'],correct:0},
+ {name:'ปกป้องป่าและชุมชน',icon:'🌳',sky:'#bce9b7',danger:'🔥',focus:'social',lesson:'การดูแลทรัพยากรธรรมชาติควรคำนึงถึงชุมชนและระบบนิเวศร่วมกัน',question:'ถ้าจะพัฒนาพื้นที่ใกล้ป่าชุมชน ควรเริ่มจากอะไร?',options:['ตัดต้นไม้ออกทั้งหมด','สำรวจข้อมูลและรับฟังชุมชนก่อนตัดสินใจ','สร้างสิ่งปลูกสร้างทันที'],correct:1},
+ {name:'สมบัติวัฒนธรรม',icon:'🏯',sky:'#f7d4a8',danger:'🪨',focus:'culture',lesson:'การจัดการภูมิวัฒนธรรมเรียนรู้คุณค่าและการดูแลมรดกของพื้นที่',question:'ถ้าอยากให้แหล่งวัฒนธรรมอยู่ได้อย่างยั่งยืน ควรทำอย่างไร?',options:['ปรับเปลี่ยนทุกอย่างเพื่อให้นักท่องเที่ยวชอบ','เก็บข้อมูลและร่วมดูแลกับคนในชุมชน','นำของโบราณออกมาเป็นของที่ระลึก'],correct:1},
+ {name:'หมู่บ้านหลากวัฒนธรรม',icon:'🎭',sky:'#e0ccfa',danger:'🌀',focus:'culture',lesson:'ภาษา วิถีชีวิต และความหลากหลายเป็นส่วนหนึ่งของอัตลักษณ์พื้นที่',question:'เมื่อทำกิจกรรมร่วมกับชุมชนที่มีวัฒนธรรมแตกต่างกัน ควรทำอย่างไร?',options:['รับฟังและเคารพความต่าง','กำหนดให้ทุกคนทำเหมือนกันทั้งหมด','มองข้ามความรู้ท้องถิ่น'],correct:0},
+ {name:'นักสำรวจ GIS',icon:'🗺️',sky:'#b9d7ff',danger:'⚡',focus:'both',lesson:'แผนที่และข้อมูลเชิงพื้นที่ช่วยทั้งการจัดการชุมชนและการจัดการวัฒนธรรม',question:'ถ้าต้องการวางแผนเส้นทางท่องเที่ยวชุมชนโดยหลีกเลี่ยงพื้นที่น้ำท่วม ควรใช้ข้อมูลใด?',options:['แผนที่แหล่งวัฒนธรรมและพื้นที่เสี่ยงน้ำท่วม','เพียงชื่อสถานที่','เฉพาะสีของแผนที่'],correct:0},
+ {name:'ค้นหาอนาคตของเรา',icon:'🎓',sky:'#b9f0d8',danger:'⭐',focus:'both',lesson:'นำความรู้เรื่องคน พื้นที่ วัฒนธรรม และเทคโนโลยีมาสร้างอนาคตที่ยั่งยืน',question:'หากต้องพัฒนาชุมชนให้เข้มแข็ง ควรให้ความสำคัญกับอะไร?',options:['ผลประโยชน์ด้านเดียว','ใช้ความคิดของคนกลุ่มเดียว','คน พื้นที่ วัฒนธรรม และสิ่งแวดล้อมร่วมกัน'],correct:2}
 ];
-
-const gaps=[[580,690],[1200,1320],[1830,1960],[2420,2520]];
-const platforms=[
- {x:420,y:365,w:125,h:17},
- {x:760,y:390,w:155,h:17},
- {x:1050,y:348,w:145,h:17},
- {x:1460,y:385,w:180,h:17},
- {x:1750,y:348,w:145,h:17},
- {x:2100,y:385,w:155,h:17},
- {x:2350,y:344,w:135,h:17}
+// Gaps and platforms change across levels, so each round feels different.
+const designs=[
+ {gaps:[[450,570],[1140,1270]],platforms:[[345,338,160],[620,332,150],[1010,315,160],[1340,337,160]]},
+ {gaps:[[540,655],[1450,1570]],platforms:[[385,325,150],[710,350,160],[1240,319,145],[1620,333,150]]},
+ {gaps:[[410,520],[990,1125]],platforms:[[315,337,130],[575,310,135],[890,337,110],[1190,320,165],[1510,339,170]]},
+ {gaps:[[620,740],[1320,1440]],platforms:[[440,315,140],[805,330,155],[1120,305,160],[1510,340,125]]},
+ {gaps:[[505,630],[1050,1180],[1550,1670]],platforms:[[350,330,135],[700,306,170],[1240,320,150],[1710,320,140]]},
+ {gaps:[[460,575],[890,1010],[1440,1560]],platforms:[[335,330,125],[630,313,135],[1080,320,155],[1600,319,150]]}
 ];
-
-let level=0,score=0,lives=3;
-let player,coins=[],enemies=[];
-let camera=0,frame=0,locked=false,finished=false;
-const keys={left:false,right:false,jump:false};
-let last=0;
-
-function groundAt(x){
- return x>=0&&x<WORLD&&!gaps.some(g=>x>=g[0]&&x<g[1]);
-}
-function resetLevel(){
- player={x:60,y:FLOOR-46,w:42,h:46,vx:0,vy:0,onGround:false,inv:0};
- camera=0;frame=0;locked=false;finished=false;
- coins=[];
- for(let x=185;x<2750;x+=105){
-  if(groundAt(x)) coins.push({x:x,y:FLOOR-75-(Math.floor(x/105)%3)*18,taken:false});
- }
- for(const p of platforms){
-  coins.push({x:p.x+p.w/2,y:p.y-34,taken:false});
- }
- enemies=[350,850,1100,1510,1740,2160,2610].map((x,i)=>({
-  x:x,y:FLOOR-34,w:35,h:34,origin:x,dir:i%2?1:-1,alive:true
- }));
- overlay.style.display="none";
- updateInfo();
-}
-function updateInfo(){
- info.textContent=`ด่าน ${level+1}/6 : ${levels[level].name} | ${"❤️".repeat(Math.max(0,lives))} | 🪙 ${score} คะแนน`;
-}
-function rectHit(a,b){
- return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
-}
-function jumpNow(){
- if(player.onGround&&!locked){
-  player.vy=JUMP;player.onGround=false;
- }
-}
-function damage(){
- if(player.inv>0||locked)return;
- lives--;
- updateInfo();
- if(lives<=0){
-  locked=true;
-  showEnd(false);
-  return;
- }
- player.x=Math.max(60,player.x-100);
- player.y=FLOOR-150;
- player.vy=-3;
- player.inv=95;
-}
-
-function update(dt){
- if(locked)return;
- frame+=dt;
- player.inv=Math.max(0,player.inv-dt);
- const oldBottom=player.y+player.h;
- player.vx=((keys.right?1:0)-(keys.left?1:0))*SPEED;
- player.x+=player.vx*dt;
- player.x=Math.max(0,Math.min(WORLD-player.w,player.x));
- player.vy+=GRAVITY*dt;
- player.y+=player.vy*dt;
- player.onGround=false;
-
- // Collision with terrain
- if(player.vy>=0){
-  const bottom=player.y+player.h;
-  if(oldBottom<=FLOOR+8&&bottom>=FLOOR){
-   const a=player.x+7,b=player.x+player.w-7;
-   if(groundAt(a)||groundAt(b)){
-    player.y=FLOOR-player.h;player.vy=0;player.onGround=true;
-   }
-  }
-  for(const p of platforms){
-   if(oldBottom<=p.y+8&&bottom>=p.y
-      &&player.x+player.w>p.x&&player.x<p.x+p.w){
-    if(!player.onGround||p.y<FLOOR){
-     player.y=p.y-player.h;player.vy=0;player.onGround=true;
-    }
-   }
-  }
- }
- if(player.y>H+120){
-  damage();
-  if(lives>0){player.x=Math.max(60,player.x-140);player.y=FLOOR-170;player.vy=0;}
- }
- for(const c of coins){
-  if(c.taken)continue;
-  const dx=player.x+player.w/2-c.x;
-  const dy=player.y+player.h/2-c.y;
-  if(dx*dx+dy*dy<1200){
-   c.taken=true;score+=10;updateInfo();
-  }
- }
- for(const e of enemies){
-  if(!e.alive)continue;
-  e.x+=e.dir*0.8*dt;
-  if(Math.abs(e.x-e.origin)>55)e.dir*=-1;
-  if(!rectHit(player,e))continue;
-  if(player.vy>1&&oldBottom<=e.y+12){
-   e.alive=false;player.vy=-8;score+=20;updateInfo();
-  }else damage();
- }
- camera+=(Math.max(0,Math.min(WORLD-W,player.x-270))-camera)*0.12*dt;
- if(player.x>WORLD-105){
-  locked=true;
-  showQuestion();
- }
-}
-
-function drawBackground(){
- let L=levels[level];
- ctx.fillStyle=L.sky;ctx.fillRect(0,0,W,H);
- ctx.fillStyle="#ffffff80";
- for(let i=0;i<12;i++){
-  let x=((i*290-camera*0.22)%(W+350)+(W+350))%(W+350)-150;
-  ctx.beginPath();ctx.ellipse(x,95+i%3*46,65,19,0,0,Math.PI*2);ctx.fill();
- }
- ctx.fillStyle=level===1?"#b47a55":"#8abd9d";
- for(let i=0;i<12;i++){
-  const x=i*320-(camera*0.45)%320;
-  ctx.beginPath();ctx.moveTo(x-160,FLOOR);ctx.lineTo(x+30,250+i%3*25);
-  ctx.lineTo(x+200,FLOOR);ctx.fill();
- }
-}
-function textEmoji(s,x,y,size=33){
- ctx.font=`${size}px Arial`;ctx.textAlign="center";ctx.fillText(s,x,y);
-}
-function drawWorld(){
- ctx.save();ctx.translate(-camera,0);
- for(let x=0;x<WORLD;x+=40){
-  if(!groundAt(x+20))continue;
-  ctx.fillStyle="#61b66d";ctx.fillRect(x,FLOOR,40,14);
-  ctx.fillStyle="#7b5438";ctx.fillRect(x,FLOOR+14,40,H-FLOOR);
-  ctx.fillStyle="#9e7249";ctx.fillRect(x+5,FLOOR+35,12,6);
- }
- for(const g of gaps){
-  ctx.fillStyle=level===1?"#fa6636":level===4?"#5142a0":"#3a9bd6";
-  ctx.fillRect(g[0],FLOOR,g[1]-g[0],H-FLOOR);
-  for(let x=g[0];x<g[1];x+=36){
-   textEmoji(level===1?"🔥":level===4?"⚡":"🌊",x+17,FLOOR+29,25);
-  }
- }
- for(const p of platforms){
-  ctx.fillStyle="#94643e";ctx.fillRect(p.x,p.y,p.w,p.h);
-  ctx.fillStyle="#71cc75";ctx.fillRect(p.x,p.y,p.w,6);
- }
- for(const c of coins){
-  if(c.taken)continue;
-  ctx.fillStyle="#ffd13e";ctx.beginPath();
-  ctx.arc(c.x,c.y,13,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle="#fff1a5";ctx.lineWidth=3;ctx.stroke();
-  textEmoji("★",c.x,c.y+6,17);
- }
- for(const e of enemies){
-  if(!e.alive)continue;
-  textEmoji(level===1?"🔥":level===4?"🤖":level===5?"🦠":"👾",e.x+17,e.y+32,34);
- }
- // Background theme decorations
- const icons=["🏠","🌲","🏯","🎨","🖥️","🏥"];
- for(let i=0;i<10;i++){
-  const x=160+i*290;
-  if(!groundAt(x))continue;
-  textEmoji(icons[level],x,FLOOR-125,49);
- }
- // Finish line
- ctx.fillStyle="#f8fafc";ctx.fillRect(WORLD-82,285,6,FLOOR-285);
- textEmoji("🏁",WORLD-55,308,49);
-
- // Capybara drawn with canvas shapes
- if(player.inv<=0||Math.floor(frame/5)%2===0){
-  const x=player.x,y=player.y;
-  ctx.fillStyle="#ad713c";
-  ctx.beginPath();ctx.roundRect(x+2,y+12,37,33,12);ctx.fill();
-  ctx.fillStyle="#c38a50";
-  ctx.beginPath();ctx.roundRect(x+9,y+1,33,28,11);ctx.fill();
-  ctx.fillStyle="#87512c";ctx.fillRect(x+12,y-4,9,13);
-  ctx.fillStyle="#201b18";
-  ctx.beginPath();ctx.arc(x+33,y+13,2.5,0,Math.PI*2);ctx.fill();
-  ctx.fillRect(x+36,y+23,6,3);
-  ctx.fillStyle="#754829";
-  ctx.fillRect(x+8,y+39,9,8);ctx.fillRect(x+27,y+39,9,8);
-  ctx.fillStyle="#e44747";ctx.fillRect(x+7,y+19,28,5);
- }
- ctx.restore();
-}
-function render(){
- drawBackground();drawWorld();
- ctx.fillStyle="#172c48a8";
- ctx.fillRect(12,12,270,42);
- ctx.fillStyle="white";ctx.textAlign="left";
- ctx.font="bold 20px Arial";
- ctx.fillText(`ด่าน ${level+1}  🪙 ${score}  ❤️ ${lives}`,24,40);
-}
-function loop(t){
- const dt=Math.min((t-last)/16.667||1,2);
- last=t;
- update(dt);render();
- requestAnimationFrame(loop);
-}
-function showQuestion(){
- const L=levels[level];
- overlay.style.display="flex";
- panel.replaceChildren();
- const heading=document.createElement("h2");
- heading.textContent="🏆 ผ่านด่าน "+(level+1);
- panel.appendChild(heading);
- const question=document.createElement("p");
- question.textContent="🧠 "+L.question;
- panel.appendChild(question);
- const feedback=document.createElement("p");
- feedback.id="feedback";
- L.options.forEach((opt,i)=>{
-  const b=document.createElement("button");
-  b.className="option";b.textContent=(i+1)+". "+opt;
-  b.onclick=()=>{
-   if(i!==L.answer){
-    feedback.textContent="❌ ยังไม่ถูก ลองตอบอีกครั้ง";
-    return;
-   }
-   feedback.style.color="green";
-   feedback.textContent="✅ "+L.explain;
-   Array.from(panel.querySelectorAll(".option")).forEach(x=>x.disabled=true);
-   const next=document.createElement("button");
-   next.className="option";
-   next.style.background="#b9e9b9";
-   next.textContent=level===5?"🎉 ดูผลสำเร็จ":"➡️ ไปด่านต่อไป";
-   next.onclick=()=>{
-    if(level===5){showEnd(true);}
-    else{level++;resetLevel();}
-   };
-   panel.appendChild(next);
-  };
-  panel.appendChild(b);
- });
- panel.appendChild(feedback);
-}
-function showEnd(won){
- overlay.style.display="flex";
- panel.replaceChildren();
- const h=document.createElement("h2");
- h.textContent=won?"🏆 ภารกิจสำเร็จ!":"💔 เกมจบแล้ว";
- const p=document.createElement("p");
- p.textContent=won?`ผ่านครบ 6 ด่าน ได้ ${score} คะแนน`:`คะแนนรวม ${score} คะแนน`;
- const b=document.createElement("button");
- b.className="option";b.textContent="🔄 เริ่มเกมใหม่";
- b.onclick=startGame;
- panel.append(h,p,b);
-}
-function startGame(){
- level=0;score=0;lives=3;
- keys.left=false;keys.right=false;keys.jump=false;
- resetLevel();
-}
-function bindButton(id,key){
- const el=document.getElementById(id);
- const down=e=>{
-  e.preventDefault();
-  if(el.setPointerCapture)el.setPointerCapture(e.pointerId);
-  if(key==="jump"){
-   if(!keys.jump)jumpNow();
-   keys.jump=true;
-  }else keys[key]=true;
-  el.classList.add("pressed");
- };
- const up=e=>{
-  e.preventDefault();
-  keys[key]=false;
-  el.classList.remove("pressed");
- };
- el.addEventListener("pointerdown",down);
- el.addEventListener("pointerup",up);
- el.addEventListener("pointercancel",up);
- el.addEventListener("lostpointercapture",()=>{keys[key]=false;el.classList.remove("pressed");});
-}
-bindButton("left","left");
-bindButton("right","right");
-bindButton("jump","jump");
-window.addEventListener("keydown",e=>{
- if(["ArrowLeft","ArrowRight","ArrowUp","Space","KeyA","KeyD","KeyW"].includes(e.code))e.preventDefault();
- if(e.code==="ArrowLeft"||e.code==="KeyA")keys.left=true;
- if(e.code==="ArrowRight"||e.code==="KeyD")keys.right=true;
- if((e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW")&&!e.repeat)jumpNow();
-});
-window.addEventListener("keyup",e=>{
- if(e.code==="ArrowLeft"||e.code==="KeyA")keys.left=false;
- if(e.code==="ArrowRight"||e.code==="KeyD")keys.right=false;
-});
-window.addEventListener("blur",()=>{
- keys.left=false;keys.right=false;keys.jump=false;
-});
-document.getElementById("restart").onclick=startGame;
-startGame();
-requestAnimationFrame(loop);
+let li=0,score=0,lives=3,player,camera=0,coins=[],enemies=[],finished=false,locked=true,frame=0;let playerAnswers={social:0,culture:0};
+const keys={left:false,right:false};
+function el(tag,txt,cls){const e=document.createElement(tag);if(txt!==undefined)e.textContent=txt;if(cls)e.className=cls;return e}
+function button(txt,fn,cls='btn'){const b=el('button',txt,cls);b.type='button';b.addEventListener('click',fn);return b}
+function clearPanel(){panel.replaceChildren();overlay.classList.remove('hidden')}
+function setHUD(){$('levelText').textContent=`${levels[li].icon} ด่าน ${li+1}/6: ${levels[li].name}`;$('lifeText').textContent='❤️'.repeat(Math.max(0,lives));$('scoreText').textContent=`🪙 ${score} คะแนน`}
+function onGround(x){return x>=0&&x<WORLD&&!designs[li].gaps.some(g=>x>=g[0]&&x<g[1])}
+function prepareLevel(){player={x:60,y:FLOOR-46,w:46,h:46,vx:0,vy:0,ground:false,inv:0};camera=0;frame=0;locked=false;finished=false;const d=designs[li];coins=[];for(let x=170;x<WORLD-95;x+=115){if(onGround(x))coins.push({x,y:FLOOR-70-(x%3)*8,taken:false})}for(const p of d.platforms)coins.push({x:p[0]+p[2]/2,y:p[1]-30,taken:false});enemies=[300,760,1280,1740].filter(x=>onGround(x)).map((x,i)=>({x,y:FLOOR-34,w:36,h:34,origin:x,dir:i%2?1:-1,alive:true}));overlay.classList.add('hidden');setHUD()}
+function newGame(){unlockAudio();li=0;score=0;lives=3;playerAnswers={social:0,culture:0};keys.left=false;keys.right=false;prepareLevel()}
+function startScreen(){clearPanel();panel.append(el('p','🐹 ยินดีต้อนรับสู่โลก Capy Hero','eyebrow'),el('h2','ผจญภัยค้นหาสาขาที่ใช่'),el('p','กระโดดข้ามอุปสรรค เก็บเหรียญ และตอบคำถามสั้น ๆ ทั้ง 6 ด่าน เพื่อรู้จักการจัดการภูมิสังคมและการจัดการภูมิวัฒนธรรม'));panel.append(button('🎮 เริ่มผจญภัย',newGame,'btn primary'));panel.append(el('p','เกมนี้ให้ความรู้และสะท้อนความสนใจ ไม่ใช่แบบทดสอบความถนัดอย่างเป็นทางการ','muted'))}
+function jump(){if(!locked&&player.ground){sfx('jump');player.vy=JUMP;player.ground=false}}
+function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function hurt(){if(player.inv>0||locked)return;lives--;sfx(lives<=0?'death':'hit');setHUD();if(lives<=0){locked=true;endScreen(false);return}player.x=Math.max(60,player.x-150);player.y=FLOOR-120;player.vy=-3;player.inv=85}
+function update(dt){if(locked)return;frame+=dt;player.inv=Math.max(0,player.inv-dt);const oldBottom=player.y+player.h;player.vx=(Number(keys.right)-Number(keys.left))*MOVE;player.x=Math.max(0,Math.min(WORLD-player.w,player.x+player.vx*dt));player.vy=Math.min(15,player.vy+GRAV*dt);player.y+=player.vy*dt;player.ground=false;
+ if(player.vy>=0){const bottom=player.y+player.h;if(oldBottom<=FLOOR+4&&bottom>=FLOOR&&(onGround(player.x+9)||onGround(player.x+player.w-9))){player.y=FLOOR-player.h;player.vy=0;player.ground=true}for(const p of designs[li].platforms){if(oldBottom<=p[1]+5&&bottom>=p[1]&&player.x+player.w>p[0]&&player.x<p[0]+p[2]&&(!player.ground||p[1]<FLOOR)){player.y=p[1]-player.h;player.vy=0;player.ground=true}}}
+ if(player.y>H+70){hurt();if(!locked){player.x=Math.max(60,player.x-130);player.y=FLOOR-130;player.vy=0}return}
+ for(const c of coins){if(c.taken)continue;const dx=player.x+23-c.x,dy=player.y+23-c.y;if(dx*dx+dy*dy<1100){c.taken=true;score+=10;sfx('coin');setHUD()}}
+ for(const e of enemies){if(!e.alive)continue;e.x+=e.dir*.85*dt;if(Math.abs(e.x-e.origin)>42)e.dir*=-1;if(hit(player,e)){if(player.vy>1&&oldBottom<=e.y+15){e.alive=false;player.vy=-9;score+=20;sfx('stomp');setHUD()}else hurt()}}
+ camera+=((Math.min(WORLD-W,Math.max(0,player.x-265)))-camera)*Math.min(.2,dt*.12);
+ if(player.x>=WORLD-85){locked=true;sfx('level');quizScreen()}}
+function emoji(txt,x,y,size=33){ctx.font=`${size}px sans-serif`;ctx.textAlign='center';ctx.fillText(txt,x,y)}
+function draw(){ctx.fillStyle=levels[li].sky;ctx.fillRect(0,0,W,H);ctx.fillStyle='#ffffff88';for(let i=0;i<11;i++){let x=((i*270-camera*.19)%(W+300)+(W+300))%(W+300)-120;ctx.beginPath();ctx.ellipse(x,80+(i%3)*46,56,18,0,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#86b6a3';for(let i=0;i<8;i++){let x=i*320-(camera*.35)%320;ctx.beginPath();ctx.moveTo(x-150,FLOOR);ctx.lineTo(x+35,230+(i%3)*25);ctx.lineTo(x+180,FLOOR);ctx.fill()}ctx.save();ctx.translate(-camera,0);for(let x=0;x<WORLD;x+=25){if(!onGround(x+12))continue;ctx.fillStyle='#5cbe73';ctx.fillRect(x,FLOOR,25,13);ctx.fillStyle='#92613c';ctx.fillRect(x,FLOOR+13,25,H-FLOOR)}for(const gap of designs[li].gaps){ctx.fillStyle=li===1?'#d85a32':'#318fcb';ctx.fillRect(gap[0],FLOOR,gap[1]-gap[0],H-FLOOR);for(let x=gap[0]+18;x<gap[1];x+=39)emoji(levels[li].danger,x,FLOOR+30,26)}for(const p of designs[li].platforms){ctx.fillStyle='#92613c';ctx.fillRect(p[0],p[1],p[2],18);ctx.fillStyle='#60c475';ctx.fillRect(p[0],p[1],p[2],7)}for(let x=210;x<WORLD-60;x+=310){if(onGround(x))emoji(levels[li].icon,x,FLOOR-110,43)}for(const c of coins){if(c.taken)continue;ctx.beginPath();ctx.fillStyle='#ffce3f';ctx.arc(c.x,c.y,12,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff4b0';ctx.lineWidth=2;ctx.stroke();emoji('★',c.x,c.y+5,15)}for(const e of enemies)if(e.alive)emoji(li===4?'🤖':'👾',e.x+18,e.y+33,36);ctx.fillStyle='#fff';ctx.fillRect(WORLD-65,265,6,FLOOR-265);emoji('🏁',WORLD-35,291,46);
+ if(player&&(!player.inv||Math.floor(frame/6)%2===0)){const x=player.x,y=player.y;ctx.fillStyle='#ac7446';ctx.beginPath();ctx.roundRect(x+2,y+14,40,31,12);ctx.fill();ctx.fillStyle='#c28b57';ctx.beginPath();ctx.roundRect(x+9,y+3,33,27,11);ctx.fill();ctx.fillStyle='#8b5633';ctx.fillRect(x+12,y-2,10,12);ctx.fillStyle='#1e2025';ctx.beginPath();ctx.arc(x+34,y+15,2.5,0,Math.PI*2);ctx.fill();ctx.fillRect(x+39,y+23,5,3);ctx.fillStyle='#e8555d';ctx.fillRect(x+7,y+25,27,5);ctx.fillStyle='#6d4930';ctx.fillRect(x+9,y+39,9,7);ctx.fillRect(x+28,y+39,9,7)}ctx.restore()}
+function quizScreen(){clearPanel();const lv=levels[li];panel.append(el('p',`${lv.icon} ภารกิจสำเร็จ`,'eyebrow'),el('h2',`ผ่านด่าน ${li+1}: ${lv.name}`),el('p',lv.lesson),el('p',`🧠 ${lv.question}`));const feedback=el('p','','feedback');lv.options.forEach((answer,i)=>{const b=button(`${i+1}. ${answer}`,()=>{if(i!==lv.correct){sfx('wrong');feedback.textContent='ยังไม่ถูก ลองใหม่อีกครั้ง';return}sfx('correct');feedback.textContent='✅ ถูกต้อง!';feedback.style.color='#267348';panel.querySelectorAll('.answer').forEach(v=>v.disabled=true);panel.append(button(li===5?'✨ ค้นหาสาขาที่สนใจ':'➡️ ไปด่านต่อไป',()=>{if(li===5){interestScreen()}else{li++;prepareLevel()}},'btn primary'))},'btn answer');panel.append(b)});panel.append(feedback)}
+function interestScreen(){clearPanel();panel.append(el('p','🎓 ภารกิจสุดท้าย','eyebrow'),el('h2','คุณอยากเป็นฮีโร่แบบไหน?'),el('p','เลือกสิ่งที่คุณสนใจจริง ๆ ผลนี้ใช้เพื่อแนะนำสาขาวิชา ไม่ใช่การตัดสินว่าคุณเหมาะหรือไม่เหมาะกับสาขาใด'));panel.append(button('🌏 ชอบแก้ปัญหาชุมชน น้ำท่วม สิ่งแวดล้อม และแผนที่',()=>resultScreen('social')));panel.append(button('🏯 ชอบวัฒนธรรม ประเพณี ภูมิปัญญา และแหล่งท่องเที่ยว',()=>resultScreen('culture')));panel.append(button('💚 สนใจทั้งสองด้าน',()=>resultScreen('both')))}
+function resultScreen(type){sfx('finish');clearPanel();const title=type==='social'?'การจัดการภูมิสังคม':type==='culture'?'การจัดการภูมิวัฒนธรรม':'ทั้งสองสาขาวิชา';const detail=type==='social'?'เรียนรู้การวิเคราะห์พื้นที่ ความสัมพันธ์คนกับสิ่งแวดล้อม และการทำงานกับชุมชน':type==='culture'?'เรียนรู้มรดกวัฒนธรรม ภูมิปัญญา อัตลักษณ์ และการจัดการพื้นที่วัฒนธรรม':'ทั้งการจัดการภูมิสังคมและการจัดการภูมิวัฒนธรรมมีแนวทางเชื่อมโยงคน พื้นที่ และการพัฒนาที่ยั่งยืน';panel.append(el('p','🎉 ยินดีด้วย! เล่นครบ 6 ด่าน','eyebrow'),el('h2','ค้นพบแนวทางที่คุณสนใจ'),el('p',`คะแนนผจญภัยของคุณ: ${score} คะแนน`));const box=el('div','','result');box.append(el('span','สาขาที่คุณสนใจ','pill'),el('h2',title),el('p',detail));panel.append(box,el('p','🎓 เรียนรู้เพิ่มเติมได้ที่วิทยาลัยโพธิวิชชาลัย มหาวิทยาลัยศรีนครินทรวิโรฒ'));panel.append(el('p','ตรวจสอบชื่อหลักสูตร รายละเอียดวิชา และข้อมูลรับสมัครจากช่องทางอย่างเป็นทางการของวิทยาลัยก่อนตัดสินใจ','muted'));panel.append(button('🎮 เล่นใหม่',newGame,'btn primary'));panel.append(button('📋 คัดลอกผลของฉัน',()=>{const msg=`ฉันเล่น Capy Hero ครบ 6 ด่าน ได้ ${score} คะแนน และสนใจ: ${title} 🐹`;if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(msg).then(()=>alert('คัดลอกผลสำเร็จ')).catch(()=>prompt('คัดลอกข้อความนี้',msg))}else prompt('คัดลอกข้อความนี้',msg)}))}
+function endScreen(win){clearPanel();panel.append(el('h2',win?'🎉 สำเร็จ':'💔 พลังหมดแล้ว'),el('p',`คะแนนสะสม ${score} คะแนน`),button('↻ ลองอีกครั้ง',newGame,'btn primary'))}
+let last=0;function loop(t){const dt=Math.min(2,(t-last)/16.667||1);last=t;update(dt);draw();requestAnimationFrame(loop)}
+function bind(id,key){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('pressed');if(key==='jump')jump();else keys[key]=true});function release(e){e.preventDefault();b.classList.remove('pressed');if(key!=='jump')keys[key]=false}b.addEventListener('pointerup',release);b.addEventListener('pointercancel',release);b.addEventListener('lostpointercapture',()=>{b.classList.remove('pressed');if(key!=='jump')keys[key]=false})}bind('left','left');bind('right','right');bind('jump','jump');
+window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Space','ArrowUp','KeyA','KeyD','KeyW'].includes(e.code))e.preventDefault();if(['ArrowLeft','KeyA'].includes(e.code))keys.left=true;if(['ArrowRight','KeyD'].includes(e.code))keys.right=true;if(['Space','ArrowUp','KeyW'].includes(e.code)&&!e.repeat)jump()});window.addEventListener('keyup',e=>{if(['ArrowLeft','KeyA'].includes(e.code))keys.left=false;if(['ArrowRight','KeyD'].includes(e.code))keys.right=false});window.addEventListener('blur',()=>{keys.left=false;keys.right=false});$('restart').onclick=()=>{if(confirm('ต้องการเริ่มเกมใหม่?'))newGame()};$('how').onclick=startScreen;
+prepareLevel();locked=true;startScreen();requestAnimationFrame(loop);
 </script>
 </body>
 </html>
-
