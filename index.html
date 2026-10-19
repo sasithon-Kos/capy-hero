@@ -1,1 +1,396 @@
 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Capy Hero Adventure</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#142438;color:white;font-family:Arial,Tahoma,sans-serif;text-align:center}
+header{padding:10px;background:#182c46}
+h2{margin:4px;font-size:21px}
+#info{font-size:14px;margin-top:5px}
+#game{display:block;width:100%;max-width:960px;margin:auto;background:#8ed8fa;touch-action:none}
+.controls{display:flex;justify-content:space-between;align-items:center;max-width:960px;margin:12px auto;padding:0 14px;gap:12px}
+.pad{display:flex;gap:13px}
+.ctrl{border:2px solid #ffffff66;background:#294d78;color:white;border-radius:18px;width:76px;height:69px;font-size:29px;font-weight:bold;touch-action:none;user-select:none;-webkit-user-select:none}
+.ctrl:active,.ctrl.pressed{background:#f4a340;color:#172333}
+#jump{width:112px;background:#d77438}
+#restart{background:#405e84;border:0;border-radius:12px;color:white;padding:10px 20px;margin:5px}
+#overlay{position:fixed;inset:0;background:#071526df;display:none;align-items:center;justify-content:center;z-index:10;padding:20px}
+.panel{width:100%;max-width:450px;background:#fff;color:#203047;border-radius:20px;padding:25px;text-align:left;box-shadow:0 12px 40px #0006}
+.panel h2{text-align:center}
+.option{display:block;width:100%;padding:15px;margin:10px 0;background:#e8f1ff;color:#173653;border:0;border-radius:12px;font-size:16px;text-align:left}
+.option:active{background:#badbff}
+#feedback{color:#c04128;font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+<h2>🐹 CAPY HERO ADVENTURE</h2>
+<div id="info">ด่าน 1 | ❤️❤️❤️ | 🪙 0 คะแนน</div>
+</header>
+
+<canvas id="game" width="960" height="540"></canvas>
+
+<div class="controls">
+ <div class="pad">
+  <button class="ctrl" id="left">◀</button>
+  <button class="ctrl" id="right">▶</button>
+ </div>
+ <button class="ctrl" id="jump">⬆ กระโดด</button>
+</div>
+<button id="restart">🔄 เริ่มเกมใหม่</button>
+<div style="font-size:12px;padding:10px">เดินไปข้างหน้า เก็บเหรียญ หลบศัตรู แล้วไปให้ถึงธงเส้นชัย</div>
+
+<div id="overlay"><div class="panel" id="panel"></div></div>
+
+<script>
+"use strict";
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const info=document.getElementById("info");
+const overlay=document.getElementById("overlay");
+const panel=document.getElementById("panel");
+
+const W=960,H=540;
+const FLOOR=458, WORLD=2900;
+const GRAVITY=0.58, SPEED=4.7, JUMP=-12.8;
+
+const levels=[
+ {name:"มหภัยน้ำท่วม",theme:"flood",sky:"#9bdcf5",
+  question:"หากพบถนนที่มีน้ำท่วมสูง ควรทำอย่างไร?",
+  options:["ขับรถฝ่าน้ำทันที","หลีกเลี่ยงเส้นทางและตรวจสอบข้อมูล","เดินลงไปทดสอบกระแสน้ำ"],
+  answer:1,explain:"น้ำอาจลึกหรือไหลแรงกว่าที่เห็น ควรหลีกเลี่ยงและตรวจสอบเส้นทางปลอดภัย"},
+ {name:"ภารกิจไฟป่า",theme:"fire",sky:"#f5c48d",
+  question:"เมื่อพบไฟป่าใกล้ชุมชน สิ่งใดเหมาะสมที่สุด?",
+  options:["เข้าไปดับไฟด้วยตนเองทันที","แจ้งเจ้าหน้าที่และออกจากพื้นที่เสี่ยง","ยืนถ่ายคลิปใกล้เปลวไฟ"],
+  answer:1,explain:"ควรแจ้งหน่วยงานที่รับผิดชอบและปฏิบัติตามคำแนะนำการอพยพ"},
+ {name:"ผจญภัยเมืองวัฒนธรรม",theme:"culture",sky:"#b1e8fa",
+  question:"การท่องเที่ยวเชิงวัฒนธรรมอย่างยั่งยืนควรทำอย่างไร?",
+  options:["เคารพวิถีชีวิตและกติกาชุมชน","นำโบราณวัตถุกลับบ้าน","เข้าไปในพื้นที่หวงห้าม"],
+  answer:0,explain:"การเคารพชุมชนและมรดกวัฒนธรรมช่วยรักษาคุณค่าของพื้นที่"},
+ {name:"โลกแห่งความหลากหลาย",theme:"diversity",sky:"#e5caf8",
+  question:"เมื่อต้องทำงานร่วมกับผู้คนต่างวัฒนธรรม ควรทำอย่างไร?",
+  options:["เหมารวมว่าทุกคนเหมือนกัน","ไม่รับฟังความคิดเห็นที่แตกต่าง","รับฟังและเคารพความแตกต่าง"],
+  answer:2,explain:"ความเข้าใจและการเคารพซึ่งกันและกันเป็นพื้นฐานของการอยู่ร่วมกัน"},
+ {name:"เมืองแห่ง AI",theme:"ai",sky:"#a9caff",
+  question:"หาก AI ให้ข้อมูลที่น่าสงสัย ควรทำอย่างไร?",
+  options:["เชื่อทันที","ตรวจสอบจากแหล่งข้อมูลที่น่าเชื่อถือ","แชร์ต่อโดยไม่ตรวจสอบ"],
+  answer:1,explain:"AI อาจสร้างข้อมูลผิดพลาด จึงต้องตรวจสอบก่อนนำไปใช้"},
+ {name:"ภารกิจหยุดโรคระบาด",theme:"health",sky:"#b9eedb",
+  question:"วิธีใดช่วยลดการแพร่กระจายของโรคติดเชื้อทางเดินหายใจ?",
+  options:["ปิดบังอาการป่วย","ใช้ของส่วนตัวร่วมกัน","ล้างมือ ระบายอากาศ และปฏิบัติตามคำแนะนำสาธารณสุข"],
+  answer:2,explain:"สุขอนามัยและการป้องกันที่เหมาะสมช่วยลดความเสี่ยงการติดเชื้อ"}
+];
+
+const gaps=[[580,690],[1200,1320],[1830,1960],[2420,2520]];
+const platforms=[
+ {x:420,y:365,w:125,h:17},
+ {x:760,y:390,w:155,h:17},
+ {x:1050,y:348,w:145,h:17},
+ {x:1460,y:385,w:180,h:17},
+ {x:1750,y:348,w:145,h:17},
+ {x:2100,y:385,w:155,h:17},
+ {x:2350,y:344,w:135,h:17}
+];
+
+let level=0,score=0,lives=3;
+let player,coins=[],enemies=[];
+let camera=0,frame=0,locked=false,finished=false;
+const keys={left:false,right:false,jump:false};
+let last=0;
+
+function groundAt(x){
+ return x>=0&&x<WORLD&&!gaps.some(g=>x>=g[0]&&x<g[1]);
+}
+function resetLevel(){
+ player={x:60,y:FLOOR-46,w:42,h:46,vx:0,vy:0,onGround:false,inv:0};
+ camera=0;frame=0;locked=false;finished=false;
+ coins=[];
+ for(let x=185;x<2750;x+=105){
+  if(groundAt(x)) coins.push({x:x,y:FLOOR-75-(Math.floor(x/105)%3)*18,taken:false});
+ }
+ for(const p of platforms){
+  coins.push({x:p.x+p.w/2,y:p.y-34,taken:false});
+ }
+ enemies=[350,850,1100,1510,1740,2160,2610].map((x,i)=>({
+  x:x,y:FLOOR-34,w:35,h:34,origin:x,dir:i%2?1:-1,alive:true
+ }));
+ overlay.style.display="none";
+ updateInfo();
+}
+function updateInfo(){
+ info.textContent=`ด่าน ${level+1}/6 : ${levels[level].name} | ${"❤️".repeat(Math.max(0,lives))} | 🪙 ${score} คะแนน`;
+}
+function rectHit(a,b){
+ return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+}
+function jumpNow(){
+ if(player.onGround&&!locked){
+  player.vy=JUMP;player.onGround=false;
+ }
+}
+function damage(){
+ if(player.inv>0||locked)return;
+ lives--;
+ updateInfo();
+ if(lives<=0){
+  locked=true;
+  showEnd(false);
+  return;
+ }
+ player.x=Math.max(60,player.x-100);
+ player.y=FLOOR-150;
+ player.vy=-3;
+ player.inv=95;
+}
+
+function update(dt){
+ if(locked)return;
+ frame+=dt;
+ player.inv=Math.max(0,player.inv-dt);
+ const oldBottom=player.y+player.h;
+ player.vx=((keys.right?1:0)-(keys.left?1:0))*SPEED;
+ player.x+=player.vx*dt;
+ player.x=Math.max(0,Math.min(WORLD-player.w,player.x));
+ player.vy+=GRAVITY*dt;
+ player.y+=player.vy*dt;
+ player.onGround=false;
+
+ // Collision with terrain
+ if(player.vy>=0){
+  const bottom=player.y+player.h;
+  if(oldBottom<=FLOOR+8&&bottom>=FLOOR){
+   const a=player.x+7,b=player.x+player.w-7;
+   if(groundAt(a)||groundAt(b)){
+    player.y=FLOOR-player.h;player.vy=0;player.onGround=true;
+   }
+  }
+  for(const p of platforms){
+   if(oldBottom<=p.y+8&&bottom>=p.y
+      &&player.x+player.w>p.x&&player.x<p.x+p.w){
+    if(!player.onGround||p.y<FLOOR){
+     player.y=p.y-player.h;player.vy=0;player.onGround=true;
+    }
+   }
+  }
+ }
+ if(player.y>H+120){
+  damage();
+  if(lives>0){player.x=Math.max(60,player.x-140);player.y=FLOOR-170;player.vy=0;}
+ }
+ for(const c of coins){
+  if(c.taken)continue;
+  const dx=player.x+player.w/2-c.x;
+  const dy=player.y+player.h/2-c.y;
+  if(dx*dx+dy*dy<1200){
+   c.taken=true;score+=10;updateInfo();
+  }
+ }
+ for(const e of enemies){
+  if(!e.alive)continue;
+  e.x+=e.dir*0.8*dt;
+  if(Math.abs(e.x-e.origin)>55)e.dir*=-1;
+  if(!rectHit(player,e))continue;
+  if(player.vy>1&&oldBottom<=e.y+12){
+   e.alive=false;player.vy=-8;score+=20;updateInfo();
+  }else damage();
+ }
+ camera+=(Math.max(0,Math.min(WORLD-W,player.x-270))-camera)*0.12*dt;
+ if(player.x>WORLD-105){
+  locked=true;
+  showQuestion();
+ }
+}
+
+function drawBackground(){
+ let L=levels[level];
+ ctx.fillStyle=L.sky;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle="#ffffff80";
+ for(let i=0;i<12;i++){
+  let x=((i*290-camera*0.22)%(W+350)+(W+350))%(W+350)-150;
+  ctx.beginPath();ctx.ellipse(x,95+i%3*46,65,19,0,0,Math.PI*2);ctx.fill();
+ }
+ ctx.fillStyle=level===1?"#b47a55":"#8abd9d";
+ for(let i=0;i<12;i++){
+  const x=i*320-(camera*0.45)%320;
+  ctx.beginPath();ctx.moveTo(x-160,FLOOR);ctx.lineTo(x+30,250+i%3*25);
+  ctx.lineTo(x+200,FLOOR);ctx.fill();
+ }
+}
+function textEmoji(s,x,y,size=33){
+ ctx.font=`${size}px Arial`;ctx.textAlign="center";ctx.fillText(s,x,y);
+}
+function drawWorld(){
+ ctx.save();ctx.translate(-camera,0);
+ for(let x=0;x<WORLD;x+=40){
+  if(!groundAt(x+20))continue;
+  ctx.fillStyle="#61b66d";ctx.fillRect(x,FLOOR,40,14);
+  ctx.fillStyle="#7b5438";ctx.fillRect(x,FLOOR+14,40,H-FLOOR);
+  ctx.fillStyle="#9e7249";ctx.fillRect(x+5,FLOOR+35,12,6);
+ }
+ for(const g of gaps){
+  ctx.fillStyle=level===1?"#fa6636":level===4?"#5142a0":"#3a9bd6";
+  ctx.fillRect(g[0],FLOOR,g[1]-g[0],H-FLOOR);
+  for(let x=g[0];x<g[1];x+=36){
+   textEmoji(level===1?"🔥":level===4?"⚡":"🌊",x+17,FLOOR+29,25);
+  }
+ }
+ for(const p of platforms){
+  ctx.fillStyle="#94643e";ctx.fillRect(p.x,p.y,p.w,p.h);
+  ctx.fillStyle="#71cc75";ctx.fillRect(p.x,p.y,p.w,6);
+ }
+ for(const c of coins){
+  if(c.taken)continue;
+  ctx.fillStyle="#ffd13e";ctx.beginPath();
+  ctx.arc(c.x,c.y,13,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#fff1a5";ctx.lineWidth=3;ctx.stroke();
+  textEmoji("★",c.x,c.y+6,17);
+ }
+ for(const e of enemies){
+  if(!e.alive)continue;
+  textEmoji(level===1?"🔥":level===4?"🤖":level===5?"🦠":"👾",e.x+17,e.y+32,34);
+ }
+ // Background theme decorations
+ const icons=["🏠","🌲","🏯","🎨","🖥️","🏥"];
+ for(let i=0;i<10;i++){
+  const x=160+i*290;
+  if(!groundAt(x))continue;
+  textEmoji(icons[level],x,FLOOR-125,49);
+ }
+ // Finish line
+ ctx.fillStyle="#f8fafc";ctx.fillRect(WORLD-82,285,6,FLOOR-285);
+ textEmoji("🏁",WORLD-55,308,49);
+
+ // Capybara drawn with canvas shapes
+ if(player.inv<=0||Math.floor(frame/5)%2===0){
+  const x=player.x,y=player.y;
+  ctx.fillStyle="#ad713c";
+  ctx.beginPath();ctx.roundRect(x+2,y+12,37,33,12);ctx.fill();
+  ctx.fillStyle="#c38a50";
+  ctx.beginPath();ctx.roundRect(x+9,y+1,33,28,11);ctx.fill();
+  ctx.fillStyle="#87512c";ctx.fillRect(x+12,y-4,9,13);
+  ctx.fillStyle="#201b18";
+  ctx.beginPath();ctx.arc(x+33,y+13,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillRect(x+36,y+23,6,3);
+  ctx.fillStyle="#754829";
+  ctx.fillRect(x+8,y+39,9,8);ctx.fillRect(x+27,y+39,9,8);
+  ctx.fillStyle="#e44747";ctx.fillRect(x+7,y+19,28,5);
+ }
+ ctx.restore();
+}
+function render(){
+ drawBackground();drawWorld();
+ ctx.fillStyle="#172c48a8";
+ ctx.fillRect(12,12,270,42);
+ ctx.fillStyle="white";ctx.textAlign="left";
+ ctx.font="bold 20px Arial";
+ ctx.fillText(`ด่าน ${level+1}  🪙 ${score}  ❤️ ${lives}`,24,40);
+}
+function loop(t){
+ const dt=Math.min((t-last)/16.667||1,2);
+ last=t;
+ update(dt);render();
+ requestAnimationFrame(loop);
+}
+function showQuestion(){
+ const L=levels[level];
+ overlay.style.display="flex";
+ panel.replaceChildren();
+ const heading=document.createElement("h2");
+ heading.textContent="🏆 ผ่านด่าน "+(level+1);
+ panel.appendChild(heading);
+ const question=document.createElement("p");
+ question.textContent="🧠 "+L.question;
+ panel.appendChild(question);
+ const feedback=document.createElement("p");
+ feedback.id="feedback";
+ L.options.forEach((opt,i)=>{
+  const b=document.createElement("button");
+  b.className="option";b.textContent=(i+1)+". "+opt;
+  b.onclick=()=>{
+   if(i!==L.answer){
+    feedback.textContent="❌ ยังไม่ถูก ลองตอบอีกครั้ง";
+    return;
+   }
+   feedback.style.color="green";
+   feedback.textContent="✅ "+L.explain;
+   Array.from(panel.querySelectorAll(".option")).forEach(x=>x.disabled=true);
+   const next=document.createElement("button");
+   next.className="option";
+   next.style.background="#b9e9b9";
+   next.textContent=level===5?"🎉 ดูผลสำเร็จ":"➡️ ไปด่านต่อไป";
+   next.onclick=()=>{
+    if(level===5){showEnd(true);}
+    else{level++;resetLevel();}
+   };
+   panel.appendChild(next);
+  };
+  panel.appendChild(b);
+ });
+ panel.appendChild(feedback);
+}
+function showEnd(won){
+ overlay.style.display="flex";
+ panel.replaceChildren();
+ const h=document.createElement("h2");
+ h.textContent=won?"🏆 ภารกิจสำเร็จ!":"💔 เกมจบแล้ว";
+ const p=document.createElement("p");
+ p.textContent=won?`ผ่านครบ 6 ด่าน ได้ ${score} คะแนน`:`คะแนนรวม ${score} คะแนน`;
+ const b=document.createElement("button");
+ b.className="option";b.textContent="🔄 เริ่มเกมใหม่";
+ b.onclick=startGame;
+ panel.append(h,p,b);
+}
+function startGame(){
+ level=0;score=0;lives=3;
+ keys.left=false;keys.right=false;keys.jump=false;
+ resetLevel();
+}
+function bindButton(id,key){
+ const el=document.getElementById(id);
+ const down=e=>{
+  e.preventDefault();
+  if(el.setPointerCapture)el.setPointerCapture(e.pointerId);
+  if(key==="jump"){
+   if(!keys.jump)jumpNow();
+   keys.jump=true;
+  }else keys[key]=true;
+  el.classList.add("pressed");
+ };
+ const up=e=>{
+  e.preventDefault();
+  keys[key]=false;
+  el.classList.remove("pressed");
+ };
+ el.addEventListener("pointerdown",down);
+ el.addEventListener("pointerup",up);
+ el.addEventListener("pointercancel",up);
+ el.addEventListener("lostpointercapture",()=>{keys[key]=false;el.classList.remove("pressed");});
+}
+bindButton("left","left");
+bindButton("right","right");
+bindButton("jump","jump");
+window.addEventListener("keydown",e=>{
+ if(["ArrowLeft","ArrowRight","ArrowUp","Space","KeyA","KeyD","KeyW"].includes(e.code))e.preventDefault();
+ if(e.code==="ArrowLeft"||e.code==="KeyA")keys.left=true;
+ if(e.code==="ArrowRight"||e.code==="KeyD")keys.right=true;
+ if((e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW")&&!e.repeat)jumpNow();
+});
+window.addEventListener("keyup",e=>{
+ if(e.code==="ArrowLeft"||e.code==="KeyA")keys.left=false;
+ if(e.code==="ArrowRight"||e.code==="KeyD")keys.right=false;
+});
+window.addEventListener("blur",()=>{
+ keys.left=false;keys.right=false;keys.jump=false;
+});
+document.getElementById("restart").onclick=startGame;
+startGame();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
+
